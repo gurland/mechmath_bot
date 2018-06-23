@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-
+import os
 import random
 import re
+import time
 
-
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
+import aiosocksy
+import asyncio
 import pytz
 
 import config
+import tokens
 from commands import (arxiv_queries, dice, me, morning_message, wiki, wolfram, kek)
 from utils import (dp, command_with_delay, commands_handler, scheduler, action_log, user_action_log)
 
@@ -37,12 +42,12 @@ async def rules_command(message):
 
 @dp.message_handler(func=commands_handler(['/wiki']))
 async def wolfram_solver(message):
-    await wiki.my_wiki(message)
+	await wiki.my_wiki(message)
 
 
 @dp.message_handler(func=commands_handler(['/wolfram', '/wf']))
 async def wolfram_solver(message):
-    await wolfram.wolfram_solver(message)
+	await wolfram.wolfram_solver(message)
 
 
 @dp.message_handler(func=commands_handler(['/arxiv']))
@@ -92,20 +97,20 @@ async def me_message(message):
 @dp.message_handler(func=commands_handler(['/or']))
 @command_with_delay(delay=1)
 async def command_or(message):
-    user_action_log(message, "called: " + message.text)
+    user_action_log(message, 'called: ' + message.text)
     # Shitcode alert!
-    or_lang = "ru"
+    or_lang = 'ru'
     if len(message.text.split()) < 4:
         return
     or_message = message.text.split(' ', 1)[1]
-    if "or" in message.text.split():
+    if 'or' in message.text.split():
         make_choice = re.split(r'[ ](?:or)[, ]', or_message)
-        or_lang = "en"
+        or_lang = 'en'
     else:
         make_choice = re.split(r'[ ](?:или)[, ]', or_message)
-    if len(make_choice) > 1 and not ((message.text.split()[1] == "или") or (message.text.split()[1] == "or")):
+    if len(make_choice) > 1 and not ((message.text.split()[1] == 'или') or (message.text.split()[1] == 'or')):
         choosen_answer = random.choice(make_choice)
-        if or_lang == "ru":
+        if or_lang == 'ru':
             choosen_answer = re.sub(r'(?i)\bя\b', 'ты', choosen_answer)
         else:
             choosen_answer = re.sub(r'(?i)\bi\b', 'you', choosen_answer)
@@ -119,6 +124,8 @@ async def my_kek(message):
     await kek.my_kek(message)
 
 
+
+
 if __name__ == '__main__':
     if config.debug_mode:
         action_log("Running bot in Debug mode!")
@@ -126,9 +133,9 @@ if __name__ == '__main__':
         action_log("Running bot!")
 
     scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
-                      timezone=pytz.timezone('Europe/Moscow'))
+                        timezone=pytz.timezone('Europe/Moscow'))
 
     scheduler.add_job(morning_message.unpin_msg, 'cron', id='unpin_msg', replace_existing=True, hour=13,
-                      timezone=pytz.timezone('Europe/Moscow'))
+                        timezone=pytz.timezone('Europe/Moscow'))
 
     executor.start_polling(dp)

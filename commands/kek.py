@@ -1,12 +1,14 @@
-#!/usr/bin/env python
-# _*_ coding: utf-8 _*_
+#!/usr/bin/env python3
 import logging
 import os
 import random
 import time
 
+import asyncio
+from first import first
+
 import config
-from utils import user_action_log
+from utils import my_bot, user_action_log
 
 
 async def my_kek(message):
@@ -56,17 +58,13 @@ async def my_kek(message):
                 # кикаем кекуна из чата (можно ещё добавить условие,
                 # что если один юзер прокекал больше числа n за время t,
                 # то тоже в бан)
-                pass
-                # TODO: execute kek-ban on aiogram
-                '''
-                my_bot.kick_chat_member(message.chat.id,
+                await my_bot.kick_chat_member(message.chat.id,
                                         message.from_user.id)
                 user_action_log(message, 'has been kicked out')
-                my_bot.unban_chat_member(message.chat.id,
+                await my_bot.unban_chat_member(message.chat.id,
                                          message.from_user.id)
                 # тут же снимаем бан, чтобы смог по ссылке к нам вернуться
                 user_action_log(message, 'has been unbanned')
-                '''
         except Exception as ex:
             logging.exception(ex)
             pass
@@ -86,10 +84,9 @@ async def my_kek(message):
                             'got that kek:\n{0}'.format(your_file.name))
         elif type_of_kek == 10:
             await message.reply_document(random.choice(config.gif_links))
-        elif type_of_kek < 10:
+        elif type_of_kek < 9:
             your_kek = ''
             file_kek = open(config.file_location['kek_file_ids'], 'r', encoding='utf-8')
-            # while your_kek == '\n':
             your_kek = random.choice(file_kek.readlines())
             # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
             if str(your_kek).startswith('<sticker>'):
@@ -97,16 +94,12 @@ async def my_kek(message):
                 await message.reply_sticker(sticker_id)
             # если попалась строчка вида '<audio>ID', то шлём аудио по ID
             elif str(your_kek).startswith('<audio>'):
-                pass
-            '''
-            # TODO: fix audio-keks
                 audio_id = str(your_kek[7:]).strip()
-                my_bot.send_audio(message.chat.id, audio_id, reply_to_message_id=message.message_id)
+                await my_bot.send_audio(message.chat.id, audio_id, reply_to_message_id=message.message_id)
             # если попалась строчка вида '<voice>ID', то шлём голосовое сообщение по ID
             elif str(your_kek).startswith('<voice>'):
                 voice_id = str(your_kek[7:]).strip()
-                my_bot.send_voice(message.chat.id, voice_id, reply_to_message_id=message.message_id)
-            '''
+                await my_bot.send_voice(message.chat.id, voice_id, reply_to_message_id=message.message_id)
             user_action_log(message,
                             'got that kek:\n{0}'.format(str(your_kek).replace('<br>', '\n')[:35]))
         # иначе смотрим файл

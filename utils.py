@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import re
 from datetime import datetime
 from builtins import any
