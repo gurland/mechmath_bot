@@ -1,7 +1,7 @@
 # Algebrach Bot on Aiogram
 Реализация [@algebrach_bot](https://t.me/algebrach_bot) на модуле Aiogram
 
-Написан на Python 3, установка всех необходимых модулей осуществляется командой:
+Написан на Python 3.6, установка всех необходимых модулей осуществляется командой
 ```sh
 pip3 install -r --user requirements.txt
 ```
