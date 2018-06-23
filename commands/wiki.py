@@ -13,6 +13,7 @@ from utils import user_action_log, action_log
 
 
 async def my_wiki(message):
+    wiki_title = ''
     if len(message.text.split()) == 1:
         wikipedia.set_lang(random.choice(['en','ru']))
         wiki_query = wikipedia.random(pages=1)
@@ -39,8 +40,7 @@ async def my_wiki(message):
                         'Для удобства чтения перейди по ссылке:</i>'.format(str(wiki_fact).split('\n  \n', 1)[0])
         await message.reply('<b>{0}.</b>\n{1}\n{2}'.format(wiki_title, wiki_fact, wiki_url), parse_mode='HTML')
     except wikipedia.exceptions.DisambiguationError as e:
-        wiki_options = e.options
-        wiki_list = '\n'.join(map(str, wiki_options))
+        wiki_list = '\n'.join(map(str, e.options))
         wiki_fact = ''
         await message.reply('Пожалуйста, уточни запрос.\n' \
                             'Выбери, что из перечисленного имелось в виду, и вызови /wiki ещё раз.\n{0}'.format(wiki_list))
