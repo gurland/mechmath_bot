@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import random
 import re
+import logging
 
 from aiogram.utils import executor
 import pytz
@@ -8,6 +9,12 @@ import pytz
 import config
 from commands import arxiv_queries, dice, me, morning_message, wiki, wolfram, kek
 from utils import dp, command_with_delay, commands_handler, scheduler, action_log, user_action_log
+
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename='algebrach.log')
 
 
 @dp.message_handler(func=commands_handler(['/id']))

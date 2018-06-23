@@ -2,6 +2,7 @@
 import re
 from datetime import datetime
 from builtins import any
+import logging
 
 import asyncio
 from aiogram import Bot, types
@@ -66,11 +67,11 @@ def chat_info(chat):
 
 
 def action_log(text):
-    print("{}\n{}\n".format(curr_time(), text))
+    logging.info(text)
 
 
 def user_action_log(message, text):
-    print("{}, {}\nUser {} {}\n".format(curr_time(), chat_info(message.chat), user_info(message.from_user), text))
+    logging.info("{}\nUser {} {}\n".format(chat_info(message.chat), user_info(message.from_user), text))
 
 
 def command_with_delay(delay=10):
