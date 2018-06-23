@@ -11,7 +11,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import config
 
 
-my_bot = Bot(token=config.bot_token,proxy=config.PROXY_URL,proxy_auth=config.PROXY_AUTH)
+my_bot = Bot(token=config.bot_token,proxy=config.PROXY_URL, proxy_auth=config.PROXY_AUTH)
 dp = Dispatcher(my_bot)
 
 scheduler = AsyncIOScheduler()
@@ -19,7 +19,7 @@ scheduler.start()
 
 
 async def bot_name(bot):
-	return (await bot.me).username
+    return (await bot.me).username
 
 loop = asyncio.get_event_loop()
 my_bot_name = loop.run_until_complete(bot_name(my_bot))
