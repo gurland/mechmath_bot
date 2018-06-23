@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-import os
-import random
-import sys
-from urllib import parse
 
-import asyncio
+import random
+
 import wikipedia
 from langdetect import detect
 
-from utils import user_action_log, action_log
+from utils import user_action_log
 
 
 async def my_wiki(message):

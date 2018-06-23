@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
-import os
 import random
 import re
-import time
 
-from aiogram import Bot, types
-from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
-import aiosocksy
-import asyncio
 import pytz
 
 import config
-import tokens
 from commands import (arxiv_queries, dice, me, morning_message, wiki, wolfram, kek)
 from utils import (dp, command_with_delay, commands_handler, scheduler, action_log, user_action_log)
 
@@ -42,12 +35,12 @@ async def rules_command(message):
 
 @dp.message_handler(func=commands_handler(['/wiki']))
 async def wolfram_solver(message):
-	await wiki.my_wiki(message)
+    await wiki.my_wiki(message)
 
 
 @dp.message_handler(func=commands_handler(['/wolfram', '/wf']))
 async def wolfram_solver(message):
-	await wolfram.wolfram_solver(message)
+    await wolfram.wolfram_solver(message)
 
 
 @dp.message_handler(func=commands_handler(['/arxiv']))
@@ -124,8 +117,6 @@ async def my_kek(message):
     await kek.my_kek(message)
 
 
-
-
 if __name__ == '__main__':
     if config.debug_mode:
         action_log("Running bot in Debug mode!")
@@ -133,9 +124,9 @@ if __name__ == '__main__':
         action_log("Running bot!")
 
     scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
-                        timezone=pytz.timezone('Europe/Moscow'))
+                      timezone=pytz.timezone('Europe/Moscow'))
 
     scheduler.add_job(morning_message.unpin_msg, 'cron', id='unpin_msg', replace_existing=True, hour=13,
-                        timezone=pytz.timezone('Europe/Moscow'))
+                      timezone=pytz.timezone('Europe/Moscow'))
 
     executor.start_polling(dp)

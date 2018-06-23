@@ -4,9 +4,6 @@ import os
 import random
 import time
 
-import asyncio
-from first import first
-
 import config
 from utils import my_bot, user_action_log
 
