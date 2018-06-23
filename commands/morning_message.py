@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# _*_ coding: utf-8 _*_
+#!/usr/bin/env python3
 import datetime
 import random
 

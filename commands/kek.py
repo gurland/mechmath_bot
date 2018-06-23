@@ -1,16 +1,14 @@
-#!/usr/bin/env python
-# _*_ coding: utf-8 _*_
+#!/usr/bin/env python3
 import logging
 import os
 import random
 import time
 
 import asyncio
-
 from first import first
 
 import config
-from utils import user_action_log
+from utils import my_bot, user_action_log
 
 
 async def my_kek(message):
