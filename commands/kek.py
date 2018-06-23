@@ -9,11 +9,11 @@ from utils import my_bot, user_action_log
 
 
 async def my_kek(message):
-    '''
+    """
     открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
     :param message:
     :return:
-    '''
+    """
     if not hasattr(my_kek, 'kek_bang'):
         my_kek.kek_bang = time.time()
     if not hasattr(my_kek, 'kek_crunch'):
