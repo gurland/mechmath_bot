@@ -10,11 +10,12 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 import aiosocksy
 import asyncio
+import pytz
 
 import config
 import tokens
-from commands import (arxiv_queries, dice, me, wiki, wolfram, kek)
-from utils import (dp, command_with_delay, commands_handler, user_action_log)
+from commands import (arxiv_queries, dice, me, morning_message, wiki, wolfram, kek)
+from utils import (dp, command_with_delay, commands_handler, scheduler, action_log, user_action_log)
 
 
 @dp.message_handler(func=commands_handler(['/id']))
@@ -127,4 +128,15 @@ async def my_kek(message):
 
 
 if __name__ == '__main__':
+    if config.debug_mode:
+        action_log("Running bot in Debug mode!")
+    else:
+        action_log("Running bot!")
+
+    scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7.
+                        timezone=pytz.timezone('Europe/Moscow'))
+
+    scheduler.add_job(morning_message.unpin_msg, 'cron', id='unpin_msg', replace_existing=True, hour=13,
+                        timezone=pytz.timezone('Europe/Moscow'))
+
     executor.start_polling(dp)

@@ -7,12 +7,16 @@ from builtins import any
 import asyncio
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import config
 
 
 my_bot = Bot(token=config.bot_token,proxy=config.PROXY_URL,proxy_auth=config.PROXY_AUTH)
 dp = Dispatcher(my_bot)
+
+scheduler = AsyncIOScheduler()
+scheduler.start()
 
 
 async def bot_name(bot):
