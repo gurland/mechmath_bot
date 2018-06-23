@@ -23,6 +23,7 @@ vk_ver = '5.68'
 # Альбом паблика мехмата в ФБ
 mm_fb_album = '1690168107688487'
 
+bot_token = tokens.bot
 # Mеняет ресурсы на тестовые и включает доступ у админов бота ко всем командам
 debug_mode = False  # TODO: command line parameter
 # if debug_mode:
@@ -33,6 +34,7 @@ if len(sys.argv) == 2:
         mm_channel = ''
         mm_vk_group = '-152881225'
         mm_fb_album = ''
+        bot_token = tokens.bot_test
 
 
 data_dir = 'data/'

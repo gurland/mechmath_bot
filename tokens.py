@@ -5,6 +5,7 @@ import os
 
 bot_default = ''
 bot = os.getenv('ALGEBRACH_BOT_TOKEN_TELEGRAM', bot_default)
+bot_test = os.getenv('ALGEBRACH_BOT_TOKEN_TEST_TELEGRAM', bot_default)
 
 wolfram_default = ''
 wolfram = os.getenv('ALGEBRACH_BOT_TOKEN_WOLFRAM', wolfram_default)

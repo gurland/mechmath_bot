@@ -9,10 +9,9 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 
 import config
-import tokens
 
 
-my_bot = Bot(token=tokens.bot,proxy=config.PROXY_URL,proxy_auth=config.PROXY_AUTH)
+my_bot = Bot(token=config.bot_token,proxy=config.PROXY_URL,proxy_auth=config.PROXY_AUTH)
 dp = Dispatcher(my_bot)
 
 
