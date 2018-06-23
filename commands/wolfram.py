@@ -2,9 +2,7 @@
 
 import io
 
-import asyncio
 import requests
-from aiogram import types
 from PIL import Image
 
 import tokens

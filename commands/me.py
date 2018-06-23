@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import logging
 
-import asyncio
-
 from utils import user_action_log
 
 

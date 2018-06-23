@@ -9,9 +9,8 @@ from xml.etree import ElementTree
 import arxiv
 import pytz
 import requests
-from aiogram import types
 
-from utils import my_bot, user_action_log, action_log
+from utils import user_action_log, action_log
 
 
 async def arxiv_checker(message):

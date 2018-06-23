@@ -3,7 +3,6 @@
 import datetime
 import random
 
-import asyncio
 import bs4
 import pytz
 import requests

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3_
 import random
 
-import asyncio
-
 from utils import user_action_log
 
 
