@@ -132,7 +132,7 @@ if __name__ == '__main__':
     else:
         action_log("Running bot!")
 
-    scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7.
+    scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
                         timezone=pytz.timezone('Europe/Moscow'))
 
     scheduler.add_job(morning_message.unpin_msg, 'cron', id='unpin_msg', replace_existing=True, hour=13,
