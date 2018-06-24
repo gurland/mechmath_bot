@@ -75,11 +75,11 @@ async def schedule_morning_messages():
     while True:
         now = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
 
-        if now.hour == 3 and now.minute == 43:
+        if now.hour == 7 and now.minute == 0:
             await morning_msg()
             await asyncio.sleep(60)
 
-        elif now.hour == 3 and now.minute == 45:
+        elif now.hour == 13 and now.minute == 0:
             await unpin_msg()
             await asyncio.sleep(60)
 
