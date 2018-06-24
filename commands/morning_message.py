@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import datetime
 import random
+import asyncio
 
 import bs4
 import pytz
@@ -45,6 +46,7 @@ async def morning_msg():
     now = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
 
     people_in_chat = await my_bot.get_chat_members_count(config.mm_chat)
+    print(people_in_chat)
 
     text += 'Сегодня *{} {}*, *{}*. Нас в чате *{}*!'.format(now.day, month_names[now.month - 1],
                                                              weekday_names[now.weekday()],
@@ -67,3 +69,18 @@ async def unpin_msg():
     if message is not None:
         if message.from_user.is_bot is True:
             await my_bot.unpin_chat_message(config.mm_chat)
+
+
+async def schedule_morning_messages():
+    while True:
+        now = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
+
+        if now.hour == 3 and now.minute == 43:
+            await morning_msg()
+            await asyncio.sleep(60)
+
+        elif now.hour == 3 and now.minute == 45:
+            await unpin_msg()
+            await asyncio.sleep(60)
+
+        await asyncio.sleep(10)

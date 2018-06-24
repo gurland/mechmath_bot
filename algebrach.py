@@ -8,7 +8,7 @@ import pytz
 
 import config
 from commands import arxiv_queries, dice, me, morning_message, wiki, wolfram, kek
-from utils import dp, command_with_delay, commands_handler, scheduler, action_log, user_action_log
+from utils import dp, command_with_delay, commands_handler, action_log, user_action_log, loop, my_bot
 
 
 logging.basicConfig(level=logging.INFO,
@@ -130,10 +130,6 @@ if __name__ == '__main__':
     else:
         action_log("Running bot!")
 
-    scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
-                      timezone=pytz.timezone('Europe/Moscow'))
+    dp.loop.create_task(morning_message.schedule_morning_messages())
+    executor.start_polling(dp, skip_updates=True)
 
-    scheduler.add_job(morning_message.unpin_msg, 'cron', id='unpin_msg', replace_existing=True, hour=13,
-                      timezone=pytz.timezone('Europe/Moscow'))
-
-    executor.start_polling(dp)
