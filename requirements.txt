@@ -1,7 +1,6 @@
 aiogram>=1.3.2
 aiohttp>=3.3.2
 aiosocksy>=0.1.1
-APScheduler>=3.5.1
 arxiv>=0.2.2
 beautifulsoup4>=4.6.0
 first>=2.0.1
