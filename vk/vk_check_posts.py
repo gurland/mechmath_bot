@@ -1,12 +1,7 @@
 #/usr/bin/env python3
-import datetime
-import os
-
 import aiohttp
 import asyncio
-import first
 import logging
-import pytz
 
 import config
 import tokens
@@ -39,7 +34,6 @@ async def vk_check(session, vkgroup_id, date_last_post):
             else:
                 return 0
     except KeyError as ex:
-        logging.exception(ex)
         if (await response.json()['error']['error_code']) == 5:
             # Alert the admins about an invalid token
             await my_bot.send_message(mm_chat_debug, 'Что-то не так с токеном у ВК! Проверка новых постов приостановлена.\nФиксики приде, порядок наведе!')
@@ -85,7 +79,7 @@ async def vk_prepare(session, post):
             tokens.vk, post['owner_id'], config.vk_ver)
         async with session,get(query_usersget) as response:
             op_name = '{0} {1}'.format((await response.json())['response'][0]['first_name'],
-                                        (await response.json())['response'][0]['last_name'], )
+                                        (await response.json())['response'][0]['last_name'])
             op_screenname = (await response.json())['response'][0]['id']
         post_head += 'пользователя <a href="https://vk.com/id{0}">{1}</a>'.format(op_screenname, op_name)
 
