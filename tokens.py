@@ -6,6 +6,9 @@ bot_default = ''
 bot = os.getenv('ALGEBRACH_BOT_TOKEN_TELEGRAM', bot_default)
 bot_test = os.getenv('ALGEBRACH_BOT_TOKEN_TEST_TELEGRAM', bot_default)
 
+default_vk = ''
+vk = os.getenv('MM_BOT_VK_TOKEN', default_vk)
+
 wolfram_default = ''
 wolfram = os.getenv('ALGEBRACH_BOT_TOKEN_WOLFRAM', wolfram_default)
 
