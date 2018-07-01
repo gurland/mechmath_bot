@@ -4,11 +4,10 @@ import re
 import logging
 
 from aiogram.utils import executor
-import pytz
 
 import config
 from commands import arxiv_queries, dice, me, morning_message, wiki, wolfram, kek
-from utils import dp, command_with_delay, commands_handler, action_log, user_action_log, loop, my_bot
+from utils import dp, command_with_delay, commands_handler, action_log, user_action_log
 
 
 logging.basicConfig(level=logging.INFO,
