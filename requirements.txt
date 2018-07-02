@@ -10,3 +10,4 @@ Pillow>=5.1.0
 pytz>=2018.4
 requests>=2.19.1
 wikipedia>=1.4.0
+peewee
