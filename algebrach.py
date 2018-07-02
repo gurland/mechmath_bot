@@ -4,10 +4,13 @@ import re
 import logging
 
 from aiogram.utils import executor
+from aiogram.types.message import ContentType
+from peewee import DoesNotExist, fn
 
 import config
-from commands import arxiv_queries, dice, me, morning_message, wiki, wolfram, kek
-from utils import dp, command_with_delay, commands_handler, action_log, user_action_log
+from commands import arxiv_queries, dice, me, morning_message, wiki, wolfram, kek, content_ui
+from utils import dp, command_with_delay, commands_handler, action_log, user_action_log, error_log, strip_tags
+from models import User, TextResponse
 
 
 logging.basicConfig(level=logging.INFO,
@@ -24,9 +27,8 @@ async def process_start_command(message):
 @dp.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/channels']))
 async def my_new_data(message):
     command = message.text.lower().split()[0]
-    command_raw = re.split("@+", command)[0]
-    with open(config.file_location[command_raw], 'r', encoding='utf-8') as file:
-        await message.reply(file.read(), parse_mode="HTML", disable_web_page_preview=True)
+    text_response = TextResponse.get(type=command[1:])
+    await message.reply(text_response.content, parse_mode="HTML", disable_web_page_preview=True)
     user_action_log(message, "called that command: {}".format(command))
 
 
@@ -34,8 +36,8 @@ async def my_new_data(message):
 @command_with_delay(delay=3)
 async def rules_command(message):
     if str(message.chat.id) == config.mm_chat:
-        with open(config.file_location['/rules'], 'r', encoding='utf-8') as file:
-            await message.reply(file.read(), parse_mode="HTML", disable_web_page_preview=True)
+        text_response = TextResponse.get(type='rules')
+        await message.reply(text_response, parse_mode="HTML", disable_web_page_preview=True)
         user_action_log(message, "called rules")
 
 
@@ -82,10 +84,10 @@ async def my_dn(message):
 
 @dp.message_handler(func=commands_handler(['/gender']))
 async def your_gender(message):
-    with open(config.file_location['/gender'], 'r', encoding='utf-8') as file_gender:
-        gender = random.choice(file_gender.readlines())
-        await message.reply(gender)
-    user_action_log(message, "has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
+    gender = TextResponse.get_random_by_type('gender')
+    if gender:
+        await message.reply(gender.content)
+        user_action_log(message, "has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
 
 
 @dp.message_handler(func=commands_handler(['/me']))
@@ -121,6 +123,49 @@ async def command_or(message):
 @command_with_delay(delay=1)
 async def my_kek(message):
     await kek.my_kek(message)
+
+
+@dp.message_handler(func=commands_handler(['/rand_user']))
+@command_with_delay(delay=1)
+async def rand_user(message):
+    if message.chat.type != 'private':
+        chat_id = message.chat.id
+        query = User.select().where(User.chat_id == chat_id, User.is_member).order_by(fn.Random())
+        if query:
+            user = query[0]
+            await message.reply('Вам выпал: <a href="tg://user?id={}">{}</a>'.
+                                format(user.user_id, strip_tags(user.first_name)), parse_mode='HTML')
+        else:
+            error_log(f"No users with {chat_id} in database!")
+    else:
+        message.reply("КТО ВЫ ТО? Я ТУТ ОДИН!")
+
+
+@dp.message_handler(content_types=ContentType.NEW_CHAT_MEMBERS)
+async def new_chat_members(message):
+    new_users = message.new_chat_members
+    for user in new_users:
+        User.create(user_id=user.id, chat_id=message.chat.id, first_name=user.first_name, last_name=user.last_name,
+                    is_member=True)
+        action_log(f'New user joined the group. ID: {user.id} | First name: {user.first_name}')
+
+
+@dp.message_handler(content_types=ContentType.LEFT_CHAT_MEMBER)
+async def left_chat_member(message):
+    left_user = message.left_chat_member
+    if left_user:
+        try:
+            user = User.get(user_id=left_user.id)
+            user.is_member = False
+            user.save()
+            action_log(f'User left the group. ID: {user.id} | First name: {user.first_name}')
+        except DoesNotExist:
+            error_log('Left chat member does not exist')
+
+
+@dp.message_handler(func=commands_handler(['/content_ui']))
+async def content_ui(message):
+    await content_ui.init_ui(message)
 
 
 if __name__ == '__main__':
