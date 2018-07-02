@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import re
 from datetime import datetime
+from html.parser import HTMLParser
 import logging
 
 import asyncio
@@ -12,6 +13,21 @@ import config
 
 my_bot = Bot(token=config.bot_token, proxy=config.PROXY_URL, proxy_auth=config.PROXY_AUTH)
 dp = Dispatcher(my_bot)
+
+
+class MLStripper(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.strict = False
+        self.convert_charrefs = True
+        self.fed = []
+
+    def handle_data(self, d):
+        self.fed.append(d)
+
+    def get_data(self):
+        return ''.join(self.fed)
 
 
 async def bot_name(bot):
@@ -61,6 +77,10 @@ def chat_info(chat):
         return chat.type + ': ' + chat.title + ' (' + str(chat.id) + ')'
 
 
+def error_log(text):
+    logging.error(text)
+
+
 def action_log(text):
     logging.info(text)
 
@@ -85,3 +105,9 @@ def command_with_delay(delay=10):
         return wrapped
 
     return my_decorator
+
+
+def strip_tags(html):
+    s = MLStripper()
+    s.feed(html)
+    return s.get_data()
