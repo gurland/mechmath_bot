@@ -37,6 +37,12 @@ loop = asyncio.get_event_loop()
 my_bot_name = loop.run_until_complete(bot_name(my_bot))
 
 
+def divide_text(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+
 def curr_time():
     return datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
