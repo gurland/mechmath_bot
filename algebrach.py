@@ -41,22 +41,6 @@ async def rules_command(message):
         user_action_log(message, "called rules")
 
 
-@dp.message_handler(func=commands_handler(['/wiki']))
-async def wolfram_solver(message):
-    await wiki.my_wiki(message)
-
-
-@dp.message_handler(func=commands_handler(['/wolfram', '/wf']))
-async def wolfram_solver(message):
-    await wolfram.wolfram_solver(message)
-
-
-@dp.message_handler(func=commands_handler(['/arxiv']))
-@command_with_delay(delay=10)
-async def arxiv_checker(message):
-    await arxiv_queries.arxiv_checker(message)
-
-
 @dp.message_handler(func=commands_handler(['/truth']))
 async def my_truth(message):
     answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
@@ -72,27 +56,12 @@ async def my_roll(message):
     user_action_log(message, "recieved {0}".format(rolled_number))
 
 
-@dp.message_handler(func=commands_handler(['/d6']))
-async def my_d6(message):
-    await dice.my_d6(message)
-
-
-@dp.message_handler(func=commands_handler(['/dn']))
-async def my_dn(message):
-    await dice.my_dn(message)
-
-
 @dp.message_handler(func=commands_handler(['/gender']))
 async def your_gender(message):
     gender = TextResponse.get_random_by_type('gender')
     if gender:
         await message.reply(gender.content)
         user_action_log(message, "has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
-
-
-@dp.message_handler(func=commands_handler(['/me']))
-async def me_message(message):
-    await me.me_message(message)
 
 
 @dp.message_handler(func=commands_handler(['/or']))
@@ -117,12 +86,6 @@ async def command_or(message):
             choosen_answer = re.sub(r'(?i)\bi\b', 'you', choosen_answer)
         # more subs to come
         await message.reply(choosen_answer)
-
-
-@dp.message_handler(func=commands_handler(['/kek']))
-@command_with_delay(delay=1)
-async def my_kek(message):
-    await kek.my_kek(message)
 
 
 @dp.message_handler(func=commands_handler(['/rand_user']))
@@ -163,9 +126,18 @@ async def left_chat_member(message):
             error_log('Left chat member does not exist')
 
 
-@dp.message_handler(func=commands_handler(['/content_ui']))
-async def content_ui(message):
-    await content_ui.init_ui(message)
+dp.message_handler(func=commands_handler(['/init_ui']))(content_ui.init_ui)
+dp.message_handler(func=commands_handler(['/wiki']))(wiki.my_wiki)
+dp.message_handler(func=commands_handler(['/wolfram', '/wf']))(wolfram.wolfram_solver)
+dp.message_handler(func=commands_handler(['/me']))(me.me_message)
+dp.message_handler(func=commands_handler(['/d6']))(dice.my_d6)
+dp.message_handler(func=commands_handler(['/dn']))(dice.my_dn)
+dp.message_handler(func=commands_handler(['/arxiv']))(command_with_delay(delay=10)(arxiv_queries.arxiv_checker))
+dp.message_handler(func=commands_handler(['/kek']))(command_with_delay(delay=1)(kek.my_kek))
+
+dp.message_handler(func=lambda m: True, content_types=ContentType.ANY)(content_ui.add_message)
+
+dp.callback_query_handler(func=lambda c: c.data and c.data.startswith('ui:'))(content_ui.process_ui_callback)
 
 
 if __name__ == '__main__':
