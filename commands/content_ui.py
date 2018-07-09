@@ -62,7 +62,7 @@ async def render_page(ui_message, chat_id):
         if response_class == 'text':
             ui_text = f"Количество записей в базе: {query.count()}\n\n" '\n'.join(
                 (f"{i+1}. [{resp.id}] | {resp.content}" for i, resp in enumerate(responses))
-            )[:100]
+            )
 
             if len(ui_text) > 4096:
                 text_chunks = list(divide_text(ui_text, 4096))
