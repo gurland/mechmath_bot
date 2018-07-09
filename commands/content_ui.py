@@ -56,7 +56,7 @@ async def render_page(ui_message, chat_id):
                             types.InlineKeyboardButton("▶️️", callback_data='ui:+'))
 
         btn_count = int(ceil(query.count()/PAGINATION_LIMIT))
-        inline_keyboard.add(*[types.InlineKeyboardButton(str(x), callback_data='ui:'+str(x))
+        inline_keyboard.add(*[types.InlineKeyboardButton(str(x+1), callback_data='ui:'+str(x+1))
                             for x in range(btn_count)])
 
         if response_class == 'text':
@@ -82,6 +82,7 @@ async def render_page(ui_message, chat_id):
                 ui_message.save()
             else:
                 await my_bot.edit_message_text(ui_text, chat_id, ui_message.message_id, reply_markup=inline_keyboard)
+
 
 async def check_neighbour_pages(ui_message, direction):
     """Check whether previous or next page exists """
