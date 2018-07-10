@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 import logging
-import os
 import random
 import time
 
 import config
 from utils import my_bot, user_action_log
+from models import TextResponse, ImageResponse, GifResponse, VoiceResponse, StickerResponse
+
+from aiogram import types
 
 
-async def my_kek(message):
+async def my_kek(message: types.Message):
     """
     открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
     :param message:
@@ -44,8 +46,7 @@ async def my_kek(message):
         my_kek.kek_counter += 1
     your_destiny = random.randint(1, 30)  # если при вызове не повезло, то кикаем из чата
     if your_destiny == 13 and str(message.chat.id) == config.mm_chat:
-        await message.reply('Предупреждал же, что кикну. '
-                        'Если не предупреждал, то')
+        await message.reply('Предупреждал же, что кикну. Если не предупреждал, то')
         await message.reply_document(config.gif_links[0])
         try:
             if int(message.from_user.id) in config.admin_ids:
@@ -56,10 +57,10 @@ async def my_kek(message):
                 # что если один юзер прокекал больше числа n за время t,
                 # то тоже в бан)
                 await my_bot.kick_chat_member(message.chat.id,
-                                        message.from_user.id)
+                                              message.from_user.id)
                 user_action_log(message, 'has been kicked out')
                 await my_bot.unban_chat_member(message.chat.id,
-                                         message.from_user.id)
+                                               message.from_user.id)
                 # тут же снимаем бан, чтобы смог по ссылке к нам вернуться
                 user_action_log(message, 'has been unbanned')
         except Exception as ex:
@@ -67,48 +68,36 @@ async def my_kek(message):
             pass
     else:
         type_of_kek = random.randint(1, 33)
-        # 1/33 шанс на картинку или гифку
-        if type_of_kek == 9:
-            all_imgs = os.listdir(config.kek_dir)
-            rand_file = random.choice(all_imgs)
-            your_file = open(config.kek_dir + rand_file, 'rb')
-            if rand_file.endswith('.gif'):
-                await message.reply_document(your_file)
-            else:
-                await message.reply_photo(your_file)
-            your_file.close()
-            user_action_log(message,
-                            'got that kek:\n{0}'.format(your_file.name))
-        elif type_of_kek == 10:
+        # Image route
+        if type_of_kek == 33:
+            random_kek_image = ImageResponse.get_random_by_type('kek')
+            if random_kek_image:
+                await message.reply_photo(random_kek_image.content)
+
+        # Gif route
+        elif type_of_kek == 32:
+            random_kek_gif = GifResponse.get_random_by_type('kek')
+            if random_kek_gif:
+                await message.reply_document(('kek.gif', random_kek_gif.content))
+
+        # Retarded gif route
+        elif type_of_kek == 31:
             await message.reply_document(random.choice(config.gif_links))
-        elif type_of_kek < 9:
-            your_kek = ''
-            file_kek = open(config.file_location['kek_file_ids'], 'r', encoding='utf-8')
-            your_kek = random.choice(file_kek.readlines())
-            # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
-            if str(your_kek).startswith('<sticker>'):
-                sticker_id = str(your_kek[9:]).strip()
-                await message.reply_sticker(sticker_id)
-            # если попалась строчка вида '<audio>ID', то шлём аудио по ID
-            elif str(your_kek).startswith('<audio>'):
-                audio_id = str(your_kek[7:]).strip()
-                await my_bot.send_audio(message.chat.id, audio_id, reply_to_message_id=message.message_id)
-            # если попалась строчка вида '<voice>ID', то шлём голосовое сообщение по ID
-            elif str(your_kek).startswith('<voice>'):
-                voice_id = str(your_kek[7:]).strip()
-                await my_bot.send_voice(message.chat.id, voice_id, reply_to_message_id=message.message_id)
-            user_action_log(message,
-                            'got that kek:\n{0}'.format(str(your_kek).replace('<br>', '\n')[:35]))
-        # иначе смотрим файл
+
+        elif type_of_kek < 5:
+            kek_sticker = StickerResponse.get_random_by_type('kek')
+            if kek_sticker:
+                await message.reply_sticker(kek_sticker.content)
+
+        elif 5 < type_of_kek < 7:
+            voice_id = VoiceResponse.get_random_by_type('kek')
+            if voice_id:
+                await message.reply_voice(voice_id.content)
+
         else:
-            your_kek = ''
-            file_kek = open(config.file_location['/kek'], 'r', encoding='utf-8')
-            while your_kek == '':
-                your_kek = random.choice(file_kek.readlines())
-            await message.reply(str(your_kek).replace('<br>', '\n'))
-            file_kek.close()
-            user_action_log(message,
-                            'got that kek:\n{0}'.format(str(your_kek).replace('<br>', '\n')[:35]))
+            kek_text = TextResponse.get_random_by_type('kek')
+            if kek_text:
+                await message.reply(kek_text.content)
 
     if my_kek.kek_counter == config.limit_kek - 10:
         time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()), 60)
@@ -118,13 +107,12 @@ async def my_kek(message):
                             '(через {1} мин. {2} сек.).\n'
                             'По истечению кекочаса '
                             'счётчик благополучно сбросится.'.format(config.limit_kek - my_kek.kek_counter,
-                                                                 time_remaining[0], time_remaining[1]),
-                        parse_mode='HTML')
+                                                                     time_remaining[0], time_remaining[1]),
+                            parse_mode='HTML')
     if my_kek.kek_counter == config.limit_kek-1:
         time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()), 60)
         # TODO: fix this notification
-        await message.reply('<b>EL-FIN!</b>\n'
-                           'Теперь вы сможете кекать '
-                            'только через {0} мин. {1} сек.'.format(time_remaining[0], time_remaining[1]),
-                        parse_mode='HTML')
+        await message.reply('<b>EL-FIN!</b>\nТеперь вы сможете кекать только через {0} мин. {1} сек.'
+                            .format(time_remaining[0], time_remaining[1]),
+                            parse_mode='HTML')
     my_kek.kek_counter += 1
