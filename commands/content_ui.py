@@ -1,9 +1,9 @@
 import asyncio
 from math import ceil
 
-from utils import my_bot, divide_text, error_log
+from utils import my_bot, divide_text, error_log, create_collage
 from models import UiMessage, ManageMessageModel, TextResponse, ImageResponse, \
-    GifResponse, VoiceResponse, StickerResponse
+    GifResponse, StickerResponse
 from config import PAGINATION_LIMIT
 
 from aiogram import types
@@ -11,8 +11,7 @@ from peewee import DoesNotExist
 
 
 CALLBACK_MODELS_DICT = {'text': TextResponse, 'image': ImageResponse,
-                        'gif': GifResponse, 'sticker': StickerResponse,
-                        'voice': VoiceResponse}
+                        'gif': GifResponse, 'sticker': StickerResponse}
 
 
 async def init_ui(message: types.Message):
@@ -23,7 +22,7 @@ async def init_ui(message: types.Message):
 
     inline_keyboard = types.InlineKeyboardMarkup()
     inline_keyboard.add(*[types.InlineKeyboardButton(btn_text, callback_data='ui:'+btn_text.lower())
-                          for btn_text in ['Text', 'Image', 'Gif', 'Sticker', 'Voice']])
+                          for btn_text in ['Text', 'Image', 'Sticker', 'Gif']])
 
     await message.reply("Выберите категорию:", reply_markup=inline_keyboard)
 
@@ -38,11 +37,20 @@ async def clenup_tmp_messages(ui_message):
         ui_message.save()
 
 
+async def clenup_manage_messages(chat_id):
+    q = ManageMessageModel.select().where(ManageMessageModel.chat_id == chat_id)
+    for m in q:
+        m.delete_instance()
+        await my_bot.delete_message(chat_id, m.message_id)
+        await asyncio.sleep(1)
+
+
 async def render_page(ui_message, chat_id):
     response_class, response_type = ui_message.state.split(':')
     model = CALLBACK_MODELS_DICT[response_class]
     query = model.select().where(model.type == response_type)
     responses = query.paginate(ui_message.page, PAGINATION_LIMIT)
+
     await clenup_tmp_messages(ui_message)
 
     if responses:
@@ -59,8 +67,10 @@ async def render_page(ui_message, chat_id):
         inline_keyboard.add(*[types.InlineKeyboardButton(str(x+1), callback_data='ui:'+str(x+1))
                             for x in range(btn_count)])
 
+        ui_text = f"Количество записей в базе: {query.count()}\n\n"
+
         if response_class == 'text':
-            ui_text = f"Количество записей в базе: {query.count()}\n\n" '\n'.join(
+            ui_text += '\n'.join(
                 (f"{i+1}. [{resp.id}] | {resp.content}" for i, resp in enumerate(responses))
             )
 
@@ -82,6 +92,48 @@ async def render_page(ui_message, chat_id):
                 ui_message.save()
             else:
                 await my_bot.edit_message_text(ui_text, chat_id, ui_message.message_id, reply_markup=inline_keyboard)
+
+        elif response_class == 'image':
+            raw_collage = create_collage([(x.content, x.id) for x in responses])
+            photo_msg = await my_bot.send_photo(chat_id, raw_collage)
+            ui_text += f'Страница: {ui_message.page}'
+
+            ManageMessageModel.create(
+                type='image',
+                chat_id=photo_msg.chat.id,
+                message_id=photo_msg.message_id,
+                response_class=response_class,
+                response_type=response_type
+            )
+
+            await my_bot.edit_message_text(ui_text, chat_id, ui_message.message_id, reply_markup=inline_keyboard)
+
+        elif response_class == 'sticker':
+            collage_tiles = []
+            for response in responses:
+                sticker_file = await my_bot.download_file_by_id(response.content)
+                collage_tiles.append((sticker_file.read(), response.id))
+
+            raw_collage = create_collage(collage_tiles)
+            photo_msg = await my_bot.send_photo(chat_id, raw_collage)
+            ui_text += f'Страница: {ui_message.page}'
+
+            ManageMessageModel.create(
+                type='sticker',
+                chat_id=photo_msg.chat.id,
+                message_id=photo_msg.message_id,
+                response_class=response_class,
+                response_type=response_type
+            )
+
+            await my_bot.edit_message_text(ui_text, chat_id, ui_message.message_id, reply_markup=inline_keyboard)
+
+        elif response_class == 'gif':
+            ui_text += '\n'.join(
+                f"{i+1}. [{resp.id}] | {int(len(resp.content)/1024)} Kb" for i, resp in enumerate(responses)
+            )
+            ui_text += "\n\nИзвините, но просмотр недоступен. Только добавление или удаление"
+            await my_bot.edit_message_text(ui_text, chat_id, ui_message.message_id, reply_markup=inline_keyboard)
 
 
 async def check_neighbour_pages(ui_message, direction):
@@ -149,6 +201,7 @@ async def process_ui_callback(callback_query: types.CallbackQuery):
                     ui_message.page -= 1
                     ui_message.save()
 
+                await clenup_manage_messages(chat_id)
                 await render_page(ui_message, chat_id)
             else:
                 await my_bot.answer_callback_query(callback_query.id, text='Дальше пусто')
@@ -157,10 +210,11 @@ async def process_ui_callback(callback_query: types.CallbackQuery):
             ui_message.state = 'init'
             ui_message.save()
             await clenup_tmp_messages(ui_message)
+            await clenup_manage_messages(chat_id)
 
             inline_keyboard = types.InlineKeyboardMarkup()
             inline_keyboard.add(*[types.InlineKeyboardButton(btn_text, callback_data='ui:' + btn_text.lower())
-                                  for btn_text in ['Text', 'Image', 'Gif', 'Sticker', 'Voice']])
+                                  for btn_text in ['Text', 'Image', 'Sticker', 'Gif']])
 
             await my_bot.edit_message_text("Выберите категорию:", chat_id, ui_message.message_id,
                                            reply_markup=inline_keyboard)
@@ -168,6 +222,7 @@ async def process_ui_callback(callback_query: types.CallbackQuery):
         elif cmd.isdigit():
             ui_message.page = int(cmd)
             ui_message.save()
+            await clenup_manage_messages(chat_id)
             await render_page(ui_message, chat_id)
 
         elif cmd == 'add':
