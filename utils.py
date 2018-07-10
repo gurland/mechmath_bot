@@ -134,7 +134,7 @@ def create_collage(images, tile_height=160, tile_width=240, tile_offset=0, cols=
 
     imgno = 0
 
-    for tile_file in images:
+    for tile_file, db_id in images:
         # Tile position.
         pos = imgno + tile_offset
         x = pos % cols
@@ -146,7 +146,7 @@ def create_collage(images, tile_height=160, tile_width=240, tile_offset=0, cols=
         tile = Image.open(BytesIO(tile_file))
 
         # resize image if necessary!
-        if resize and tile.size != (tile_height, tile_width):
+        if resize and tile.size != (tile_height, tile_width) and all(tile.size):
             w_from, h_from = tile.size
             if (w_from / float(h_from) >
                     tile_height / float(tile_width)):
@@ -155,7 +155,11 @@ def create_collage(images, tile_height=160, tile_width=240, tile_offset=0, cols=
             else:
                 h_to = tile_width
                 w_to = int(h_to / float(h_from) * w_from)
-            tile = tile.resize((w_to, h_to), Image.ANTIALIAS)
+
+            try:
+                tile = tile.resize((w_to, h_to), Image.ANTIALIAS)
+            except ValueError:
+                error_log('Could not resize sticker')
 
         # Place tile on canvas.
         img.paste(tile, (xoff, yoff))
@@ -165,7 +169,7 @@ def create_collage(images, tile_height=160, tile_width=240, tile_offset=0, cols=
             font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", font_size)
 
             draw = ImageDraw.Draw(img)
-            txt = str(imgno + 1)
+            txt = f'{imgno+1} [{db_id}]'
 
             # Calculate offsets.
             txtsize = draw.textsize(txt, font=font)
