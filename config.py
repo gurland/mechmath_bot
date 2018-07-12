@@ -81,3 +81,5 @@ admin_ids = [28006241, 207275675, 217917985, 126442350, 221439208, 147100358, 25
 
 PROXY_URL = tokens.socks5_url
 PROXY_AUTH = aiosocksy.Socks5Auth(login=tokens.socks5_login, password=tokens.socks5_password)
+
+PAGINATION_LIMIT = 30
