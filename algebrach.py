@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+import logging
 import random
 import re
-import logging
 
 from aiogram.utils import executor
 import pytz
@@ -9,7 +9,7 @@ import pytz
 import config
 from commands import arxiv_queries, dice, me, morning_message, wiki, wolfram, kek
 from utils import dp, command_with_delay, commands_handler, action_log, user_action_log, loop, my_bot
-from vk import vk_check_posts
+from vk import vk_check
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -131,6 +131,6 @@ if __name__ == '__main__':
         action_log("Running bot!")
 
     dp.loop.create_task(morning_message.schedule_morning_messages())
-    dp.loop.create_task(vk_check_posts.schedule_vk(dp))
+    dp.loop.create_task(vk_check.schedule_vk(dp))
     executor.start_polling(dp, skip_updates=True)
 
